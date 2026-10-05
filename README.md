@@ -337,22 +337,6 @@ Accès : **http://localhost:8082**
 
 > Rappel : `-p PORT_HÔTE:PORT_CONTENEUR`. Seul le port de gauche change, le port du conteneur reste `8081`.
 
-### Exercice 5 (bonus) — Persister les données avec un volume
-
-```bash
-docker volume create mongo_data
-
-docker run -d \
-  --name mongodb \
-  --network mongo_lab \
-  -v mongo_data:/data/db \
-  -e MONGO_INITDB_ROOT_USERNAME=admin \
-  -e MONGO_INITDB_ROOT_PASSWORD=admin \
-  mongo
-```
-
-Supprimez puis recréez le conteneur : vos données sont conservées.
-
 ---
 
 ## 🛠️ Troubleshooting
@@ -360,7 +344,7 @@ Supprimez puis recréez le conteneur : vos données sont conservées.
 | Symptôme | Diagnostic | Commandes utiles |
 |---|---|---|
 | Mongo Express ne démarre pas | Erreur de configuration ou MongoDB injoignable | `docker ps -a` · `docker logs mongo-express` |
-| MongoDB ne démarre pas | Variable manquante, conflit de nom, volume corrompu | `docker ps -a` · `docker logs mongodb` |
+| MongoDB ne démarre pas | Variable manquante, conflit de nom ou de port | `docker ps -a` · `docker logs mongodb` |
 | Mongo Express ne contacte pas MongoDB | Conteneurs sur des réseaux différents, mauvais nom DNS, identifiants incorrects | `docker network inspect mongo_lab` · `docker logs mongo-express` |
 | Interface inaccessible | Port non publié ou déjà utilisé sur l'hôte | `docker ps` (vérifier `0.0.0.0:8081->8081/tcp`) |
 | `name is already in use` | Un conteneur du même nom existe déjà | `docker rm -f <nom>` |
@@ -410,8 +394,6 @@ docker ps -a
 docker network ls
 ```
 
-Si vous avez réalisé l'exercice bonus : `docker volume rm mongo_data`.
-
 ---
 
 ## 🔐 Bonnes pratiques et sécurité
@@ -420,7 +402,6 @@ Si vous avez réalisé l'exercice bonus : `docker volume rm mongo_data`.
 - **Ne pas publier** le port `27017` sur l'hôte sauf nécessité réelle : MongoDB doit rester accessible uniquement depuis le réseau Docker.
 - Stocker les secrets dans un fichier `.env` ou via **Docker secrets**, jamais dans l'historique de commandes ni dans le dépôt Git.
 - **Figer les versions** des images (ex. `mongo:7`) pour des déploiements reproductibles, plutôt que le tag implicite `latest`.
-- Ajouter un **volume** pour ne pas perdre les données à la suppression du conteneur.
 - Mongo Express est un outil d'administration : ne l'exposez pas sur Internet.
 
 ---
